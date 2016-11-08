@@ -3,18 +3,25 @@ var etat = navigator.onLine ? "ONLINE" : "OFFLINE";
 var lat_current_position;
 var lng_current_position;
 var map;
+var poly;
 var position_map;
 var options_map;
 var zoom_map = 15;
 var user_marker_map;
+var marker_img_icon = '/iroad/images/map-marker.png'
 var div_carte = $("#carte-content");
 var div_statut = $("#header-statut");
 var div_refocus = $("#button-refocus");
 var div_signalement = $("#button-signalement");
 var isOffCenter = false;
-
+var signalements=[];
 var current_angle = 0;
-
+class signalement {constructor(latitude,longitude,type){
+	this.latitude = latitude;
+	this.longitude = longitude;
+	this.type = type;
+}
+};
 var translationHeight = 0;
 var translationWidth = 0;
 
@@ -51,21 +58,31 @@ function createMap() {
 	
 	 user_marker_map = new google.maps.Marker({
         position: position_map,
-		draggable:true
-        //icon: marker_img_icon
+		draggable:true,
+        icon: marker_img_icon
     });
+	
+	poly = new google.maps.Polyline({
+    strokeColor: '#FF7043',
+    strokeOpacity: 5,
+    strokeWeight: 5
+  });
+  poly.setMap(map);
+	map.addListener('bounds_changed', addLatLng);
+	
 	//positionner le marqueur sur la carte
 	 user_marker_map.setMap(map);
 	 map.addListener('drag', function(){
 		 //afficher le bouton derecentrage
 	  div_refocus.fadeIn(400,'swing');
 	  isOffCenter = true;
-	 });
-	  
-  map.addListener('idle',function(){
-	  
-  });
-	
+	 }); 
+};
+
+function addLatLng() {
+//ajoute au chemin parcouru la nouvell position
+  path = poly.getPath();
+  path.push(user_marker_map.getPosition());
 };
 
 //deplace le marqueur sur la carte et recentre la carte à ce marqueur
@@ -132,6 +149,8 @@ var i =0; //itérateur test
 //Mets à jour la carte en positionnant le marqueur à la position actuelle
 function updateMarkerMap(){
 	//stockage position actuelle
+	$.cookie('user_latitude', lat_current_position);
+	$.cookie('user_longitude', lng_current_position);
 	var last_lat = lat_current_position;
 	var last_lng = lng_current_position;
 	i++;
@@ -175,6 +194,7 @@ $(document).ready(function(){
 	//initialiser la hauteur du div map 
 //div_carte.css(({"width": "100%", "height": setHeightDivMap()+"px"}));
 div_carte.css(({"width": "2000px", "height": "2000px","left":"-"+translationWidth+"px","top":"-"+translationHeight+"px"}));
+$('body').css('overflow','hidden')
 	//cacher le bouton de recentrage
 	div_refocus.hide();
 	//acquérir la position actuelle
@@ -194,12 +214,18 @@ $(document).on("pageshow", function (event, data) {
 //Test
 var autoPilot = setInterval(updateMarkerMap,500);
 
-$(".round-button").on('click', function(){
+$("#a-refocus").on('click', function(){
 	 map.panTo( user_marker_map.getPosition());
 	  div_refocus.fadeOut(400,'swing');
 	  isOffCenter =false;
 	
 });
+
+$("#a-signalement").on('click', function(){
+	 //TODO enregistrer la position GPS
+	
+});
+
 
 function showConnection(state){
 	div_statut.text(state);

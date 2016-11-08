@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/iroad/librairies/jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.css  " />
     	<link rel="stylesheet" href="/iroad/styles/iroad.css" />
-	
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
     <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+	<script src="/iroad/librairies/jquery-cookie-master/src/jquery.cookie.js"></script>
     <script src="/iroad/librairies/jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js"></script>
     <title>IRoad</title>
 </head>
@@ -49,8 +50,8 @@
 			<!-- <div id ="button-refocus">
 			<a href="" class="round-button">refocus</a>
 			</div> -->
-			<div id ="button-refocus" class="round-button"><div class="round-button-circle"><a href="" class="round-button">Focus</a></div></div>
-			<div id ="button-signalement" class="round-button"><div class="round-button-circle"><a href="" class="round-button">Test</a></div></div>
+			<div id ="button-refocus" class="round-button"><div class="round-button-circle round-button-circle-refocus"><a id="a-refocus" href="" class="round-button"><span class= "fa fa-location-arrow "></span></a></div></div>
+			<div id ="button-signalement" class="round-button"><div class="round-button-circle round-button-circle-signalement right"><a id="a-signalement" href="#signalement" class="round-button" data-transition="pop"><span class= "fa fa-exclamation-circle"></span></a></div></div>
         </div>
         <footer id="carte-footer" data-role="footer" data-position="fixed" data-theme="b">
             <div data-role="navbar">
