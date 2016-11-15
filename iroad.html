@@ -13,7 +13,7 @@
     <title>IRoad</title>
 </head>
 <body>
-    <!--page d'accueil du site montrant une animation avec le chargement des diverses API en arrière plan-->
+   
     <!-- <section id="index" data-role="page" data-add-back-btn="true" data-theme="d">
         <header data-role="header" data-theme="b">
             <h1>iRoad</h1>
@@ -50,8 +50,10 @@
 			<!-- <div id ="button-refocus">
 			<a href="" class="round-button">refocus</a>
 			</div> -->
-			<div id ="button-refocus" class="round-button"><div class="round-button-circle round-button-circle-refocus"><a id="a-refocus" href="" class="round-button"><span class= "fa fa-location-arrow "></span></a></div></div>
-			<div id ="button-signalement" class="round-button"><div class="round-button-circle round-button-circle-signalement right"><a id="a-signalement" href="#signalement" class="round-button" data-transition="pop"><span class= "fa fa-exclamation-circle"></span></a></div></div>
+				<div id="compass"><img src="/iroad/images/compass.png"/></div>
+				
+			<div id ="button-refocus" class="round-button"><div class="round-button-circle round-button-circle-refocus"><a id="a-refocus" href="" class="round-button"><span class= "fa fa-bullseye "></span></a></div></div>
+			<div id ="button-signalement" class="round-button"><div class="round-button-circle round-button-circle-signalement right"><a id="a-signalement" href="#signalement" class="round-button" data-transition="pop"><span class= "fa fa-exclamation"></span></a></div></div>
         </div>
         <footer id="carte-footer" data-role="footer" data-position="fixed" data-theme="b">
             <div data-role="navbar">
@@ -78,9 +80,15 @@
     <section id="signalement" data-role="page" data-theme="b">
         <header data-role="header" data-theme="b" data-position="fixed">
             <a href="#carte" data-theme="d" data-icon="arrow-l" data-iconpos="notext" data-shadow="false" data-iconshadow="false" class="ui-icon-nodisc"></a>
-            <h1></h1>
+            <h1></h1>0
         </header>
         <div class="content" data-role="content">
+		<div id ="signalement-content">
+		<div>
+		<img  class="img-btn" src="/iroad/images/police-btn.png" alt="Police" onclick="signaler('controle')">
+		</div>
+		</div >n
+		</div>
             <!--<form class="ui-filterable">
                 <input id="autocomplete-input" data-type="search" placeholder="Chercher une station..." />
             </form>

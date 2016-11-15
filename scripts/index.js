@@ -2,14 +2,21 @@
 var etat = navigator.onLine ? "ONLINE" : "OFFLINE";
 var lat_current_position;
 var lng_current_position;
+var lat_current_signalement;
+var lng_current_signalement;
 var map;
 var poly;
 var position_map;
 var options_map;
 var zoom_map = 15;
 var user_marker_map;
-var marker_img_icon = '/iroad/images/map-marker.png'
+var liste_signalement_marker_map=[];
+
+//Icone
+var marker_img_icon = '/iroad/images/map-marker.png';
+var marker_sign_police = '/iroad/images/police.png';
 var div_carte = $("#carte-content");
+var div_compass = $("#compass");
 var div_statut = $("#header-statut");
 var div_refocus = $("#button-refocus");
 var div_signalement = $("#button-signalement");
@@ -25,7 +32,8 @@ class signalement {constructor(latitude,longitude,type){
 var translationHeight = 0;
 var translationWidth = 0;
 
-
+//Par défaut le centre de la carte est caché car le div
+//dépasse les dimensions du viewport
 function calculerTranslationMap(){
 	
 	var centreWindowWidth = $(window).width() / 2;
@@ -127,16 +135,7 @@ function setHeightDivMap(){
 	var viewport_height = $(window).height();
 	var header_height = $("#carte-header").outerHeight();
 	var footer_height = $("#carte-footer").outerHeight();
-	
-	// var 
-	
-    // var content = $.mobile.activePage.find("div[data-role='content']:visible:visible");
-    
-    // var content_height = viewport_height - header.outerHeight() - footer.outerHeight();
-    // if((content.outerHeight() - header.outerHeight() - footer.outerHeight()) <= viewport_height) {
-        // content_height -= (content.outerHeight() - content.height());
-    // }
-    return viewport_height - header_height - footer_height;
+	return viewport_height - header_height - footer_height;
 }
 function setHeightBottomControl()
 {
@@ -223,12 +222,42 @@ $("#a-refocus").on('click', function(){
 
 $("#a-signalement").on('click', function(){
 	 //TODO enregistrer la position GPS
+	 lat_current_signalement = lat_current_position;
+	 lng_current_signalement = lng_current_position;
+	 console.log("Signalement en lat :"+	 lat_current_signalement +", lng : "+lng_current_signalement);
 	
 });
 
-
+//Ajoute un marker sur la carte
+function addMarkerOnMap(icon){
+	
+	var sglt_marker_map = new google.maps.Marker({
+        position: {lat:lat_current_signalement,lng:lng_current_signalement},
+		draggable:true,
+        icon: icon
+    });
+	
+	sglt_marker_map.setMap(map);
+}
+function signaler(value){
+	
+	switch(value){
+		case 'controle':
+		//TODO appel AJAX
+		//Ajouter un marqueur sur la carte.
+		addMarkerOnMap(marker_sign_police);
+		break;
+		default:
+		break;
+	}
+	
+};
 function showConnection(state){
 	div_statut.text(state);
+	if(state === 'OFFLINE'){
+		//TODO afficher un message et afficher la dernière position
+		//sur la carte préalablement sauvegardée
+	}
 	 //div_statut.html("<a href='#' data-icon='signal' class='ui-btn ui-corner-all ui-icon-signal ui-btn-icon-notext'>Action Icon</a>");
 };
 
@@ -236,4 +265,11 @@ function showConnection(state){
 //Gestion du offline
 window.addEventListener('online', showConnection('ONLINE'));
 window.addEventListener('offline', showConnection('OFFLINE'));
+
+//Gestion du tap sur les elements avec la classe 
+$(".img-btn").on("tap",function(){
+	$(this).animate({'width':'9%','height':'9%'},100,function(){$(this).animate({'width':'10%','height':'10%'}),300});
+	
+})
+
 

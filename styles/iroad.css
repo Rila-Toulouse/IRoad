@@ -30,6 +30,16 @@ padding-left:1%;
 	right:50px;
 }
 
+#compass{
+	position: fixed;
+	top:10%;
+	z-index:1000;
+}
+#compass img{
+	width:75%;
+	height:75%;
+}
+
 .round-button-circle-signalement{
 	border:10px solid #FFE082	;
 	background: #FFCA28;
@@ -52,6 +62,12 @@ z-index:1000;
 	position: fixed;
 bottom: 0;
 z-index:1000;
+}
+
+.img-btn{
+	width:10%;
+	height:10%;
+	cursor:pointer;
 }
 
 .round-button a {
