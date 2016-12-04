@@ -65,11 +65,16 @@ z-index:1000;
 }
 
 .img-btn{
-	width:10%;
-	height:10%;
-	cursor:pointer;
+		cursor:pointer;
 }
 
+.ui-grid-b img{
+	width:30%;
+	height:auto;
+}
+.ui-grid-b{
+	text-align:center;
+}
 .round-button a {
     display:block;
 	padding-top:50%;
@@ -90,3 +95,4 @@ z-index:1000;
 .center-wrapper * {
   margin: 0 auto;
 }
+

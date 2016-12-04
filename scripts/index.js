@@ -14,7 +14,10 @@ var liste_signalement_marker_map=[];
 
 //Icone
 var marker_img_icon = '/iroad/images/map-marker.png';
-var marker_sign_police = '/iroad/images/police.png';
+var marker_sign_police = '/iroad/images/police-marqueur.png';
+var marker_sign_travaux = '/iroad/images/travaux-marqueur.png';
+var marker_sign_bouchon = '/iroad/images/bouchon-marqueur.png';
+var marker_sign_accident = '/iroad/images/accident-marqueur.png';
 var div_carte = $("#carte-content");
 var div_compass = $("#compass");
 var div_statut = $("#header-statut");
@@ -23,10 +26,10 @@ var div_signalement = $("#button-signalement");
 var isOffCenter = false;
 var signalements=[];
 var current_angle = 0;
-class signalement {constructor(latitude,longitude,type){
+class signalement {constructor(latitude,longitude,id){
 	this.latitude = latitude;
 	this.longitude = longitude;
-	this.type = type;
+	this.id = id;
 }
 };
 var translationHeight = 0;
@@ -84,6 +87,10 @@ function createMap() {
 		 //afficher le bouton derecentrage
 	  div_refocus.fadeIn(400,'swing');
 	  isOffCenter = true;
+	  //On veut pouvoir recentrer automatiquement la carte au bout de 5s
+	  setTimeout(function(){map.panTo( user_marker_map.getPosition());
+	  div_refocus.fadeOut(400,'swing');
+	  isOffCenter =false;},5000);
 	 }); 
 };
 
@@ -152,6 +159,8 @@ function updateMarkerMap(){
 	$.cookie('user_longitude', lng_current_position);
 	var last_lat = lat_current_position;
 	var last_lng = lng_current_position;
+	//Récupérer les signalements en bases
+	recupererSignalements();
 	i++;
 	var VALUE = 0.0001;
 	//Uniquement pour des tests
@@ -213,52 +222,81 @@ $(document).on("pageshow", function (event, data) {
 //Test
 var autoPilot = setInterval(updateMarkerMap,500);
 
-$("#a-refocus").on('click', function(){
-	 map.panTo( user_marker_map.getPosition());
+function recentrer(){
+	//if(isOffCenter){
+		map.panTo( user_marker_map.getPosition());
 	  div_refocus.fadeOut(400,'swing');
 	  isOffCenter =false;
-	
+	//}	
+};
+
+
+$("#a-refocus").on('click', function(){
+	recentrer();
 });
 
 $("#a-signalement").on('click', function(){
-	 //TODO enregistrer la position GPS
-	 lat_current_signalement = lat_current_position;
+		 lat_current_signalement = lat_current_position;
 	 lng_current_signalement = lng_current_position;
 	 console.log("Signalement en lat :"+	 lat_current_signalement +", lng : "+lng_current_signalement);
 	
 });
 
 //Ajoute un marker sur la carte
-function addMarkerOnMap(icon){
+function addMarkerOnMap(icon,latitude,longitude){
 	
 	var sglt_marker_map = new google.maps.Marker({
-        position: {lat:lat_current_signalement,lng:lng_current_signalement},
+        //position: {lat:lat_current_signalement,lng:lng_current_signalement},
+		position: {lat:latitude,lng:longitude},
 		draggable:true,
         icon: icon
     });
 	
 	sglt_marker_map.setMap(map);
 }
-function signaler(value){
+// function signaler(value){
 	
-	switch(value){
-		case 'controle':
-		//TODO appel AJAX
-		//Ajouter un marqueur sur la carte.
-		addMarkerOnMap(marker_sign_police);
-		break;
-		default:
-		break;
-	}
+	// switch(value){
+		// case 'controle':
+		// //TODO appel AJAX
+		// //Ajouter un marqueur sur la carte.
+		// addMarkerOnMap(marker_sign_police,lat_current_signalement,lng_current_signalement);
+		// break;
+		// case 'accident':
+		// //TODO appel AJAX
+		// //Ajouter un marqueur sur la carte.
+		// addMarkerOnMap(marker_sign_accident,lat_current_signalement,lng_current_signalement);
+		// break;
+		// case 'bouchon':
+		// //TODO appel AJAX
+		// //Ajouter un marqueur sur la carte.
+		// addMarkerOnMap(marker_sign_bouchon,lat_current_signalement,lng_current_signalement);
+		// break;
+		// case 'travaux':
+		// //TODO appel AJAX
+		// //Ajouter un marqueur sur la carte.
+		// addMarkerOnMap(marker_sign_travaux);
+		// break;
+		
+		
+		
+		// default:
+		// break;
+	// }
 	
-};
+// };
 function showConnection(state){
-	div_statut.text(state);
+	
+	style = state ==='ONLINE' ? 'green' : 'red';
+	
+	div_statut.html("<span class= 'fa fa-microphone' aria-hidden='true'></span><span class='fa fa-signal' style='color: "+style+";'} aria-hidden='true'></span>");	
+	
+	
 	if(state === 'OFFLINE'){
 		//TODO afficher un message et afficher la dernière position
 		//sur la carte préalablement sauvegardée
 	}
-	 //div_statut.html("<a href='#' data-icon='signal' class='ui-btn ui-corner-all ui-icon-signal ui-btn-icon-notext'>Action Icon</a>");
+	
 };
 
 
@@ -268,8 +306,133 @@ window.addEventListener('offline', showConnection('OFFLINE'));
 
 //Gestion du tap sur les elements avec la classe 
 $(".img-btn").on("tap",function(){
-	$(this).animate({'width':'9%','height':'9%'},100,function(){$(this).animate({'width':'10%','height':'10%'}),300});
-	
+	//Réduire la taille du bouton puis retrouve sa taille normale
+	$(this).animate({'width':'27%','height':'auto'},100,function(){$(this).animate({'width':'27%','height':'auto'}),200});
+	setTimeout(function(){window.location.href = "#carte";},200);
 })
 
+function signaler(value){
+	
+	var icon;
+	var id;
+	var evenement = getEvenement(value);
+	
+	signalerEvenement(evenement.id,evenement.icon,lat_current_signalement,lng_current_signalement);
+	
+};
+
+function getEvenement(value){
+	var icon;
+	var id;
+	switch(value){
+		case 'controle':
+		icon = marker_sign_police;
+		id = 2;
+		break;
+		case 'accident':
+		id= 3;
+		icon = marker_sign_accident;
+		break;
+		case 'bouchon':
+		id= 1;
+		icon = marker_sign_bouchon;
+		break;
+		case 'travaux':
+		id=4;
+		icon = marker_sign_travaux;
+		break;
+		case 2:
+		icon = marker_sign_police;
+		break;
+		case 3:
+		icon = marker_sign_accident;
+		break;
+		case 1:
+		icon = marker_sign_bouchon;
+		break;
+		case 4:
+		
+		icon = marker_sign_travaux;
+		break;
+		
+		
+		default:
+		break;
+	}	
+	return { icon : icon,id:id};
+};
+
+// function afficherSignalementCarte(signalement){
+	// var icon;
+	// console.log(signalement.Id_Evenement);
+	// switch(signalement.Id_Evenement){
+		// case "1" : icon = marker_sign_bouchon;
+		// break;
+		// case "2" : icon = marker_sign_police;
+		// break;
+		// case "3" : icon = marker_sign_accident;
+		// break;
+		// case "4" : icon = marker_sign_travaux;
+		// break;
+		// default:
+		// break;
+	// }
+	// console.log(icon);
+	// addMarkerOnMap(icon,signalement.Latitude, signalement.Longitude);
+// };
+
+function afficherSignalementCarte(signalement){
+	var evenement = getEvenement(parseInt(signalement.Id_Evenement));
+	//TODO factoriser code répété ligne 265 -->287
+	// var icon;
+	// switch(signalement.id_Evenement){
+		// case 1 : icon = marker_sign_bouchon;
+		// break;
+		// case 2 : icon = marker_sign_controle;
+		// break;
+		// case 3 : icon = marker_sign_accident;
+		// break;
+		// case 4 : icon = marker_sign_travaux;
+		// break;
+		// default:
+		// break;
+	// }
+	// addMarkerOnMap(icon)
+	//TODO effacer tous les marqueurs des signalements récupérés de la carte
+		addMarkerOnMap(evenement.icon,signalement.Latitude,signalement.Longitude);
+};
+
+function signalerEvenement(id,icon){
+	var params={
+		latitude: lat_current_signalement,
+		longitude: lng_current_signalement,
+		evenement: id
+	};
+	$.post('./php/signalerEvenement.php', params ,function(result){
+		$message = result.message;
+		if(result.success){
+			if(result.nouveau){
+				addMarkerOnMap(icon,lat_current_signalement,lng_current_signalement);
+			}
+			//TODO mettre à jour l'icone
+					}
+	},"json");
+};
+
+function recupererSignalements(){
+	var params={
+		latitude: lat_current_position,
+		longitude: lng_current_position
+	};
+	
+	$.post('./php/recupererSignalements.php', params ,function(result){
+		$message = result.message;
+		if(result.success == true){
+			for(var i =0;i<result.signalements.length;i++){
+				console.log("retour ajax : " +result.signalements[i])
+				afficherSignalementCarte(result.signalements[i]);
+			}
+		}
+	},"json");
+};
 
