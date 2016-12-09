@@ -1,5 +1,7 @@
 
-var etat = navigator.onLine ? "ONLINE" : "OFFLINE";
+var isOnline = navigator.onLine ? "ONLINE" : "OFFLINE";
+var lat_offset_position;
+var lng_offset_position;
 var lat_current_position;
 var lng_current_position;
 var lat_current_signalement;
@@ -11,6 +13,7 @@ var options_map;
 var zoom_map = 15;
 var user_marker_map;
 var liste_signalement_marker_map=[];
+var timer;
 
 //Icone
 var marker_img_icon = '/iroad/images/map-marker.png';
@@ -26,10 +29,14 @@ var div_signalement = $("#button-signalement");
 var isOffCenter = false;
 var signalements=[];
 var current_angle = 0;
-class signalement {constructor(latitude,longitude,id){
+class signalement {constructor(id,latitude,longitude,marqueur,evenement,date,utilisateur){
+	this.id = id;
 	this.latitude = latitude;
 	this.longitude = longitude;
-	this.id = id;
+	this.marqueur = marqueur;
+	this.evenement = evenement;
+	this.date = date;
+	this.utilisateur=utilisateur;
 }
 };
 var translationHeight = 0;
@@ -41,13 +48,11 @@ function calculerTranslationMap(){
 	
 	var centreWindowWidth = $(window).width() / 2;
 var centreWindowHeight = $(window).height() / 2;
-console.log("le centre de la fenêtre: width " +centreWindowWidth+ ", height " +centreWindowHeight);
+//console.log("le centre de la fenêtre: width " +centreWindowWidth+ ", height " +centreWindowHeight);
 var centreDivMapWidth = 2000/2;
 var centreDivMapHeight = 2000/2;
 translationHeight = centreDivMapHeight - centreWindowHeight;
-translationWidth = centreDivMapWidth - centreWindowWidth;
-
-	
+translationWidth = centreDivMapWidth - centreWindowWidth;	
 };
  calculerTranslationMap();
 
@@ -69,7 +74,6 @@ function createMap() {
 	
 	 user_marker_map = new google.maps.Marker({
         position: position_map,
-		draggable:true,
         icon: marker_img_icon
     });
 	
@@ -83,17 +87,27 @@ function createMap() {
 	
 	//positionner le marqueur sur la carte
 	 user_marker_map.setMap(map);
-	 map.addListener('drag', function(){
+	 map.addListener('drag',
+		function(){
 		 //afficher le bouton derecentrage
-	  div_refocus.fadeIn(400,'swing');
-	  isOffCenter = true;
+		div_refocus.fadeIn(400,'swing');
+		isOffCenter = true;
+		if(timer){
+		  clearTimeout(timer); 
+		}
+	 
 	  //On veut pouvoir recentrer automatiquement la carte au bout de 5s
-	  setTimeout(function(){map.panTo( user_marker_map.getPosition());
-	  div_refocus.fadeOut(400,'swing');
-	  isOffCenter =false;},5000);
-	 }); 
+	  // timer = setTimeout(function(){map.panTo( user_marker_map.getPosition());
+	  // div_refocus.fadeOut(400,'swing');
+	  // isOffCenter =false;},5000);
+	 // });
+	 
+		timer = recentrageAuto();
+		});
+
 };
 
+createMap();
 function addLatLng() {
 //ajoute au chemin parcouru la nouvell position
   path = poly.getPath();
@@ -113,17 +127,21 @@ if(user_marker_map){
 };
 
 function geo_ok(position) {
+	//sauvegarde de la position courante 
 	lat_current_position = position.coords.latitude;
 	lng_current_position = position.coords.longitude;
+	//console.log(lat_current_position , lng_current_position );
+	lat_offset_position = lat_current_position;
+	lng_offset_position = lng_current_position;
+	//creation de la carte
 	createMap();
-	//altitude = position.coords.altitude; // seulement sur firefox
+	//recupérer les signalements existants
+	recupererSignalements();
+	
 }
 
 function geo_error(error) {
-	//alert(error.message+" / "+error.code);
-	//TODO : prévoir d'enregistrer dans un cookie la dernière position acquise;
-	lat_current_position = 43.898324599999995;
-	lng_current_position = 1.8960651999999998;
+	//TODO prevoir d'afficher le message dans un boite dialogue
 }
 
 function geo() {
@@ -160,7 +178,16 @@ function updateMarkerMap(){
 	var last_lat = lat_current_position;
 	var last_lng = lng_current_position;
 	//Récupérer les signalements en bases
-	recupererSignalements();
+			//recupererSignalements();
+	var distParcourue = calculerDistanceParcourue();
+	// >500m
+	if(distParcourue > 1){
+		recupererSignalements();
+		lat_offset_position = lat_current_position;
+		lng_offset_position = lng_current_position;
+	}
+	
+
 	i++;
 	var VALUE = 0.0001;
 	//Uniquement pour des tests
@@ -194,19 +221,25 @@ function stopAutoNavigation(){
 };
 
 $(document).ready(function(){
-	//Notification
-	showConnection(etat);
-	//placement du bouton de recentrage
+	//Vérification de l'état online/offline
+	showConnection(isOnline);
+	if(isOnline){
+		//placement du bouton de recentrage
 	div_refocus.css({"bottom" :  setHeightBottomControl()+"px"});
 	div_signalement.css({"bottom" :  setHeightBottomControl()+"px","right": div_refocus.position().left+"px"});
 	//initialiser la hauteur du div map 
-//div_carte.css(({"width": "100%", "height": setHeightDivMap()+"px"}));
-div_carte.css(({"width": "2000px", "height": "2000px","left":"-"+translationWidth+"px","top":"-"+translationHeight+"px"}));
-$('body').css('overflow','hidden')
+	//div_carte.css(({"width": "100%", "height": setHeightDivMap()+"px"}));
+	div_carte.css(({"width": "2000px", "height": "2000px","left":"-"+translationWidth+"px","top":"-"+translationHeight+"px"}));
+	$('body').css('overflow','hidden')
 	//cacher le bouton de recentrage
 	div_refocus.hide();
 	//acquérir la position actuelle
 	geo();
+	//timer
+	timer = recentrageAuto();
+	}
+	
+	
 });
 
 
@@ -223,11 +256,16 @@ $(document).on("pageshow", function (event, data) {
 var autoPilot = setInterval(updateMarkerMap,500);
 
 function recentrer(){
-	//if(isOffCenter){
 		map.panTo( user_marker_map.getPosition());
 	  div_refocus.fadeOut(400,'swing');
 	  isOffCenter =false;
-	//}	
+};
+
+function recentrageAuto(){
+	
+	return setTimeout(function(){map.panTo( user_marker_map.getPosition());
+	  div_refocus.fadeOut(400,'swing');
+	  isOffCenter =false;},5000);
 };
 
 
@@ -236,61 +274,52 @@ $("#a-refocus").on('click', function(){
 });
 
 $("#a-signalement").on('click', function(){
+	//enregistre la position de l'évènement
 		 lat_current_signalement = lat_current_position;
 	 lng_current_signalement = lng_current_position;
 	 console.log("Signalement en lat :"+	 lat_current_signalement +", lng : "+lng_current_signalement);
 	
 });
 
-//Ajoute un marker sur la carte
-function addMarkerOnMap(icon,latitude,longitude){
+function createMarker(icon,signalement){
 	
-	var sglt_marker_map = new google.maps.Marker({
+	var markerSignalement = new google.maps.Marker({
         //position: {lat:lat_current_signalement,lng:lng_current_signalement},
-		position: {lat:latitude,lng:longitude},
-		draggable:true,
+		position: {lat:signalement.latitude,lng:signalement.longitude},
         icon: icon
     });
 	
-	sglt_marker_map.setMap(map);
+	
+	return markerSignalement;
+};
+
+// //Ajoute un marker sur la carte
+// function addMarkerOnMap(icon,latitude,longitude){
+	
+	// var sglt_marker_map = new google.maps.Marker({
+        // //position: {lat:lat_current_signalement,lng:lng_current_signalement},
+		// position: {lat:latitude,lng:longitude},
+		// draggable:false,
+        // icon: icon
+    // });
+	
+	// sglt_marker_map.setMap(map);
+// }
+//Efface tous les marqueurs de la carte
+function eraseAllMarkersOnMap(){
+	if(signalements.length>0){
+for(var i =0; i<signalements.length;i++){
+		signalements[i].marqueur.setMap(null);
+	}
+	}
+	
 }
-// function signaler(value){
-	
-	// switch(value){
-		// case 'controle':
-		// //TODO appel AJAX
-		// //Ajouter un marqueur sur la carte.
-		// addMarkerOnMap(marker_sign_police,lat_current_signalement,lng_current_signalement);
-		// break;
-		// case 'accident':
-		// //TODO appel AJAX
-		// //Ajouter un marqueur sur la carte.
-		// addMarkerOnMap(marker_sign_accident,lat_current_signalement,lng_current_signalement);
-		// break;
-		// case 'bouchon':
-		// //TODO appel AJAX
-		// //Ajouter un marqueur sur la carte.
-		// addMarkerOnMap(marker_sign_bouchon,lat_current_signalement,lng_current_signalement);
-		// break;
-		// case 'travaux':
-		// //TODO appel AJAX
-		// //Ajouter un marqueur sur la carte.
-		// addMarkerOnMap(marker_sign_travaux);
-		// break;
-		
-		
-		
-		// default:
-		// break;
-	// }
-	
-// };
+
 function showConnection(state){
 	
 	style = state ==='ONLINE' ? 'green' : 'red';
 	
-	div_statut.html("<span class= 'fa fa-microphone' aria-hidden='true'></span><span class='fa fa-signal' style='color: "+style+";'} aria-hidden='true'></span>");	
-	
+	div_statut.html("<span class= 'fa fa-microphone' aria-hidden='true'></span><span class='fa fa-signal' style='color: "+style+";'} aria-hidden='true'></span>");		
 	
 	if(state === 'OFFLINE'){
 		//TODO afficher un message et afficher la dernière position
@@ -321,7 +350,10 @@ function signaler(value){
 	
 };
 
+
 function getEvenement(value){
+	
+	//TODO a voir pour mettre côté serveur
 	var icon;
 	var id;
 	switch(value){
@@ -362,44 +394,16 @@ function getEvenement(value){
 	return { icon : icon,id:id};
 };
 
-// function afficherSignalementCarte(signalement){
-	// var icon;
-	// console.log(signalement.Id_Evenement);
-	// switch(signalement.Id_Evenement){
-		// case "1" : icon = marker_sign_bouchon;
-		// break;
-		// case "2" : icon = marker_sign_police;
-		// break;
-		// case "3" : icon = marker_sign_accident;
-		// break;
-		// case "4" : icon = marker_sign_travaux;
-		// break;
-		// default:
-		// break;
-	// }
-	// console.log(icon);
-	// addMarkerOnMap(icon,signalement.Latitude, signalement.Longitude);
-// };
 
-function afficherSignalementCarte(signalement){
-	var evenement = getEvenement(parseInt(signalement.Id_Evenement));
-	//TODO factoriser code répété ligne 265 -->287
-	// var icon;
-	// switch(signalement.id_Evenement){
-		// case 1 : icon = marker_sign_bouchon;
-		// break;
-		// case 2 : icon = marker_sign_controle;
-		// break;
-		// case 3 : icon = marker_sign_accident;
-		// break;
-		// case 4 : icon = marker_sign_travaux;
-		// break;
-		// default:
-		// break;
-	// }
-	// addMarkerOnMap(icon)
-	//TODO effacer tous les marqueurs des signalements récupérés de la carte
-		addMarkerOnMap(evenement.icon,signalement.Latitude,signalement.Longitude);
+ function afficherSignalementCarte(signalement){
+		signalement.marqueur.setMap(map);
+		var infosSignalement = "Signalé le " + signalement.date+" par "+ signalement.utilisateur;
+	//Initialisation de la boite de dialogue
+	
+	//Affichage des infos au click sur le marqueur
+	signalement.marqueur.addListener('click', function() {
+	$("#desc_signalement").fadeIn();
+	});
 };
 
 function signalerEvenement(id,icon){
@@ -411,13 +415,11 @@ function signalerEvenement(id,icon){
 	$.post('./php/signalerEvenement.php', params ,function(result){
 		$message = result.message;
 		if(result.success){
-			if(result.nouveau){
-				addMarkerOnMap(icon,lat_current_signalement,lng_current_signalement);
-			}
-			//TODO mettre à jour l'icone
+			recupererSignalements();
 					}
 	},"json");
 };
+
 
 function recupererSignalements(){
 	var params={
@@ -427,12 +429,130 @@ function recupererSignalements(){
 	
 	$.post('./php/recupererSignalements.php', params ,function(result){
 		$message = result.message;
+		var marqueur;
 		if(result.success == true){
-			for(var i =0;i<result.signalements.length;i++){
-				console.log("retour ajax : " +result.signalements[i])
-				afficherSignalementCarte(result.signalements[i]);
-			}
-		}
+			checkSignalements(result.signalements);
+			console.log(signalements.length);
+			}			
+		
 	},"json");
 };
 
+//*************************************************
+//
+// Vérifie les signalements entrants (remote) et
+// met à jour la liste locale ainsi que l'affichage
+//
+//*************************************************
+function checkSignalements(remote_signalements){
+	
+	var outSign=[]; //signalements expirés
+	var inSign=[]; //nouveau signalements
+	
+	//Au démarrage de l'appli, récupérer tous les signalements
+	if (signalements.length == 0){
+		
+			signalementsToLocal(remote_signalements);
+			console.log("init signalements : " + signalements);
+		return;
+	}
+	//Aucun signalements -> effacer tous les signalements
+	if (remote_signalements.length == 0){
+		eraseAllMarkersOnMap();
+		return;
+	}
+	//Est-ce que le signalement en local existe  en remote?
+	var isInRemote=false; 
+	for(var i=0;i<signalements.length;i++)
+	{
+		for(var j=0;j<remote_signalements.length;j++){
+			if(signalements[i].id == remote_signalements[j].Id){
+				isInRemote=true;
+				break;
+			}
+		}
+		if(!isInRemote)
+			outSign.push(signalements[i]);	
+	}
+	console.log("signalements à effacer : " + outSign.length);
+	//Est-ce que le signalement en remote existe en local?
+	var isInLocal=false;
+	for(var i=0;i<remote_signalements.length;i++)
+	{
+		for(var j=0;j<signalements.length;j++)
+		{
+			if(remote_signalements[i].Id == signalements[j].id){
+				isInLocal = true;
+				break;
+			}
+		}
+		if(!isInLocal)
+				inSign.push(remote_signalements[i]);	
+	}
+	
+		//On retire les signalement obsolètes en local
+	for (var i=0; i<outSign.length;i++)
+	{
+		if(signalement.length>0)
+		{
+			console.log(signalements.length);
+			for(var j=0;j<signalements.length;j++)
+			{
+				if(signalements[j].id == outSign[i].id)
+				{
+					//effacer le marqueur
+					signalements[j].marqueur.setMap(null);
+					//mettre à jour les signalements
+					signalements.splice(j,1);
+					//on sort de la boucle
+					break;
+				}
+			}		
+		}
+	}
+
+	//on ajoute les nouveaux signalements rentrants	
+	signalementsToLocal(inSign);
+	
+	console.log("Signalements à ajouter: " +inSign.length);
+	console.log("Nb Signalements : " + signalements.length);
+};
+
+function signalementsToLocal(remote_signalements){
+	for(var i=0;i<remote_signalements.length;i++){
+		var sign = new signalement(
+			remote_signalements[i].Id,
+			parseFloat(remote_signalements[i].Latitude),
+			parseFloat(remote_signalements[i].Longitude),
+			null,
+			remote_signalements[i].Id_Evenement,
+			remote_signalements[i].DateSignalement,
+			remote_signalements[i].Id_Utilisateur);
+		var icon = getEvenement(parseInt(sign.evenement));
+		//sign.marqueur = createMarker(icon.icon,sign.latitude,sign.longitude,sign.id);
+		sign.marqueur = createMarker(icon.icon,sign);
+		signalements.push(sign);
+		afficherSignalementCarte(sign);	
+	}
+	
+}
+
+function calculerDistanceParcourue(){
+	
+  var R = 6371; // Rayon de la terre
+  var dLat = radians(lat_current_position-lat_offset_position);  
+  var dLon = radians(lng_current_position-lng_offset_position); 
+  var a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(radians(lat_offset_position)) * Math.cos(radians(lat_current_position)) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2)
+    ; 
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  var d = R * c; // Distance in km
+  return d;
+	
+};
+	
+function radians(deg) {
+  return deg * (Math.PI/180)
+}

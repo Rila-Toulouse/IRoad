@@ -20,7 +20,7 @@ try{
 	
 $bdd = new PDO("mysql:host=localhost;port=3306;dbname=iroad;charset=utf8", "root", "fig91?");
 $bdd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-$query1 = $bdd->prepare("SELECT Id,  $formule AS dist FROM signalement WHERE $formule<=100 AND Id_Evenement = ?  ORDER by dist ASC");
+$query1 = $bdd->prepare("SELECT Id,  $formule AS dist FROM signalement WHERE $formule<=0.05 AND Id_Evenement = ?  ORDER by dist ASC");
 $query1->execute(array($evenement));
 $signalement = $query1->fetch();
 

@@ -24,19 +24,20 @@ try{
 	
 $bdd = new PDO("mysql:host=localhost;port=3306;dbname=iroad;charset=utf8", "root", "fig91?");
 $bdd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-$query1 = $bdd->prepare("SELECT Id , Id_Evenement ,Latitude,Longitude, $formule AS dist FROM signalement WHERE $formule<=1000 AND Note > 0 ORDER by dist ASC");
+$query1 = $bdd->prepare("SELECT Id , Id_Evenement ,Latitude,Longitude, $formule AS dist , DateSignalement, Id_Utilisateur FROM signalement WHERE $formule<=5 AND Note > 0 ORDER by dist ASC");
 $query1->execute();
-$row = $query1->fetch();
+$rows = $query1->fetchAll();
 
-if($row){
-	$success = true;
-	$item = new Signalement();
-	$item ->Id= $row["Id"];
-	$item ->Id_Evenement = $row["Id_Evenement"];
-	$item ->Latitude = (float)$row["Latitude"];
-	$item ->Longitude = (float)$row["Longitude"];
-	array_push($signalements,$item);
-}
+ if($rows){
+	
+	 $success = true;
+	// $item = new Signalement();
+	// $item ->Id= $row["Id"];
+	// $item ->Id_Evenement = $row["Id_Evenement"];
+	// $item ->Latitude = (float)$row["Latitude"];
+	// $item ->Longitude = (float)$row["Longitude"];
+	// array_push($signalements,$item);
+ }
 
 }
 catch (Exception $e){
@@ -47,7 +48,7 @@ catch (Exception $e){
 $result=array(
 "success" => $success,
 "message" => $message,
-"signalements"=> $signalements
+"signalements"=> $rows
 );
 
 echo json_encode($result);
