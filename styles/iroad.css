@@ -30,6 +30,16 @@ padding-left:1%;
 	right:50px;
 }
 
+#compass{
+	position: fixed;
+	top:10%;
+	z-index:1000;
+}
+#compass img{
+	width:75%;
+	height:75%;
+}
+
 .round-button-circle-signalement{
 	border:10px solid #FFE082	;
 	background: #FFCA28;
@@ -54,6 +64,17 @@ bottom: 0;
 z-index:1000;
 }
 
+.img-btn{
+		cursor:pointer;
+}
+
+.ui-grid-b img{
+	width:30%;
+	height:auto;
+}
+.ui-grid-b{
+	text-align:center;
+}
 .round-button a {
     display:block;
 	padding-top:50%;
@@ -74,3 +95,4 @@ z-index:1000;
 .center-wrapper * {
   margin: 0 auto;
 }
+

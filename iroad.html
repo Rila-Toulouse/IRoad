@@ -7,13 +7,14 @@
     <link rel="stylesheet" href="/iroad/librairies/jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.css  " />
     	<link rel="stylesheet" href="/iroad/styles/iroad.css" />
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
-    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+	<script src="/iroad/librairies/jquery-1.11.1/jquery-1.11.1.js"></script>
+    <!-- <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script> -->
 	<script src="/iroad/librairies/jquery-cookie-master/src/jquery.cookie.js"></script>
     <script src="/iroad/librairies/jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js"></script>
     <title>IRoad</title>
 </head>
 <body>
-    <!--page d'accueil du site montrant une animation avec le chargement des diverses API en arrière plan-->
+   
     <!-- <section id="index" data-role="page" data-add-back-btn="true" data-theme="d">
         <header data-role="header" data-theme="b">
             <h1>iRoad</h1>
@@ -50,8 +51,13 @@
 			<!-- <div id ="button-refocus">
 			<a href="" class="round-button">refocus</a>
 			</div> -->
-			<div id ="button-refocus" class="round-button"><div class="round-button-circle round-button-circle-refocus"><a id="a-refocus" href="" class="round-button"><span class= "fa fa-location-arrow "></span></a></div></div>
-			<div id ="button-signalement" class="round-button"><div class="round-button-circle round-button-circle-signalement right"><a id="a-signalement" href="#signalement" class="round-button" data-transition="pop"><span class= "fa fa-exclamation-circle"></span></a></div></div>
+			<div data-role="popup" id="desc_signalement" class="ui-content" data-theme="a">
+			<p>I'm a simple popup.</p>
+			</div>
+			<div id="compass"><img src="/iroad/images/compass.png"/></div>
+				
+			<div id ="button-refocus" class="round-button"><div class="round-button-circle round-button-circle-refocus"><a id="a-refocus" href="" class="round-button"><span class= "fa fa-bullseye "></span></a></div></div>
+			<div id ="button-signalement" class="round-button"><div class="round-button-circle round-button-circle-signalement right"><a id="a-signalement" href="#signalement" class="round-button" data-transition="pop"><span class= "fa fa-exclamation"></span></a></div></div>
         </div>
         <footer id="carte-footer" data-role="footer" data-position="fixed" data-theme="b">
             <div data-role="navbar">
@@ -81,12 +87,24 @@
             <h1></h1>
         </header>
         <div class="content" data-role="content">
+		<div id ="signalement-content">
+   
+  <!-- /grid-c -->
+		<div class="ui-grid-b">
+  <div class="ui-block-a"><img  class="img-btn" src="/iroad/images/police-btn.png" alt="Police" onclick="signaler('controle')"/></div>
+  <div class="ui-block-b"><img  class="img-btn" src="/iroad/images/accident-btn.png" alt="Accident" onclick="signaler('accident')"></div>
+  <div class="ui-block-c"><img  class="img-btn" src="/iroad/images/travaux-btn.png" alt="Travaux" onclick="signaler('travaux')"></div>
+  <div class="ui-block-a"><img  class="img-btn" src="/iroad/images/bouchon-btn.png" alt="Travaux" onclick="signaler('bouchon')"></div>
+ 
+</div>
+		</div >
+		</div>
             <!--<form class="ui-filterable">
                 <input id="autocomplete-input" data-type="search" placeholder="Chercher une station..." />
             </form>
 
             <ul id="liste-velo" data-role="listview" data-autodividers="true" data-inset="true" data-filter="true" data-filter-reveal="false" data-input="#autocomplete-input"></ul>-->
-        </div>
+   
         <footer data-role="footer" data-position="fixed" data-theme="b"><h1></h1></footer>
     </section>
 

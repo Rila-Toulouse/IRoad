@@ -47,6 +47,9 @@ function rotateMap(pointA,pointB,pointC){
             div_carte.css({
                  transform: "rotate(" + now + "deg)",
             });
+			div_compass.css({
+                 transform: "rotate(" + now + "deg)",
+            });
         }
     });
 	}
