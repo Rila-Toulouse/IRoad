@@ -31,28 +31,46 @@
 
     <!--page principale montrant la carte-->
     <section id="carte" data-role="page" data-add-back-btn="true" data-theme="d">
-        <!--<div data-role="panel" data-position="right" data-display="overlay" id="Apropos" class="ui-content" data-theme="b">
-            <h3>A propos...</h3>
-            <p>Bike finder</p>
-            <p>Author : Rémy Delmas</p>
-            <p>Version : 0.1</p>
-            <p>Date :  October 12 , 2016</p>
-            <a href="#Home" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-btn-a ui-icon-delete ui-btn-icon-left ui-btn-inline">Close</a>
-        </div>-->
+        <div data-role="panel" data-position="right" data-display="overlay" id="configuration" class="ui-content" data-theme="b">
+            <h1>Configuration <span class= "fa fa-cogs fa-2x"></span></h1> 
+			<label for="flip-1">Rotation dynamique de la carte</label>
+			<select name="flip-1" id="flip-rotation" data-role="flipswitch" data-theme="b">
+				<option value="off">Off</option>
+				<option value="on">On</option>
+			</select>
+			<label for="flip-2">Tracé du parcours</label>
+			<select name="flip-2" id="flip-parcours" data-role="flipswitch" data-theme="b">
+				<option value="off">Off</option>
+				<option value="on">On</option>
+			</select>
+            <br>
+            <a href="#carte" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-btn-a ui-icon-delete ui-btn-icon-left ui-btn-inline">Close</a>
+        </div>
+		
+		
 		
         <header id="carte-header" data-role="header" data-theme="b">
 		
 		<div class="hd-application">IRoad</div>
-		<div id="header-statut" class="hd-statut ui-nodisc-icon ui-alt-icon"></div>
+		<!-- <div id="header-statut" class="hd-statut ui-nodisc-icon ui-alt-icon"></div> -->
        
         </header>
         <div class="content" data-role="content">
 			<div id="carte-content" ></div>
-			<!-- <div id ="button-refocus">
-			<a href="" class="round-button">refocus</a>
-			</div> -->
-			<div data-role="popup" id="desc_signalement" class="ui-content" data-theme="a">
-			<p>I'm a simple popup.</p>
+			
+			<div data-role="popup" id="desc_signalement" class="ui-content" data-theme="b"></div>
+			<div data-role="popup" id="network_alert" class="ui-content" data-theme="b">
+				<div>
+					<center><img src="/iroad/images/offline.png"/></center>	
+				</div>
+				<h1>Aucune connexion internet...<h1>
+			</div>
+			<div data-role="popup" id="geo_alert" class="ui-content" data-theme="b">
+				<div>
+					<center><img src="/iroad/images/geo.png"/></center>	
+				</div>
+				<p><strong>Localisation indisponible...</strong></p>
+				<p>Veuillez activer la position sur le navigateur ou l'appareil</p>
 			</div>
 			<div id="compass"><img src="/iroad/images/compass.png"/></div>
 				
@@ -62,8 +80,8 @@
         <footer id="carte-footer" data-role="footer" data-position="fixed" data-theme="b">
             <div data-role="navbar">
                 <ul>
-                    <li><a href="#" class="ui-btn ui-btn-inline ui-corner-all" onclick="stopAutoNavigation()">Compte</a></li>
-                    <li><a href="#" onclick="">Infos</a></li>
+                    <li><a href="#"  onclick="stopAutoNavigation()"><span class= "fa fa-sign-in fa-2x"></span></a></li>
+                    <li><a href="#configuration" onclick=""><span class= "fa fa-cogs fa-2x"></span></a></li>
                 </ul>
             </div>
         </footer>
@@ -99,12 +117,6 @@
 </div>
 		</div >
 		</div>
-            <!--<form class="ui-filterable">
-                <input id="autocomplete-input" data-type="search" placeholder="Chercher une station..." />
-            </form>
-
-            <ul id="liste-velo" data-role="listview" data-autodividers="true" data-inset="true" data-filter="true" data-filter-reveal="false" data-input="#autocomplete-input"></ul>-->
-   
         <footer data-role="footer" data-position="fixed" data-theme="b"><h1></h1></footer>
     </section>
 

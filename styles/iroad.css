@@ -68,6 +68,11 @@ z-index:1000;
 		cursor:pointer;
 }
 
+.img-center{
+	margin-left:auto;
+	margin-right:auto;
+}
+
 .ui-grid-b img{
 	width:30%;
 	height:auto;

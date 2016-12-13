@@ -24,7 +24,7 @@ try{
 	
 $bdd = new PDO("mysql:host=localhost;port=3306;dbname=iroad;charset=utf8", "root", "fig91?");
 $bdd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-$query1 = $bdd->prepare("SELECT Id , Id_Evenement ,Latitude,Longitude, $formule AS dist , DateSignalement, Id_Utilisateur FROM signalement WHERE $formule<=5 AND Note > 0 ORDER by dist ASC");
+$query1 = $bdd->prepare("SELECT Id , Id_Evenement ,Latitude,Longitude, $formule AS dist , DateSignalement, Id_Utilisateur , Note FROM signalement WHERE $formule<=5 AND Note > 0 ORDER by dist ASC");
 $query1->execute();
 $rows = $query1->fetchAll();
 
