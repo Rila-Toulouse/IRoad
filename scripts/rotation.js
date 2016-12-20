@@ -56,3 +56,19 @@ function rotateMap(pointA,pointB,pointC){
    
 	
 };
+
+//annuler la rotation de la carte
+function cancelRotationMap(){
+	$({deg:last_angle}).animate({deg: 0}, {
+        duration: 3000,
+        step: function(now){
+            div_carte.css({
+                 transform: "rotate(" + now + "deg)",
+            });
+			div_compass.css({
+                 transform: "rotate(" + now + "deg)",
+            });
+        }
+    });
+
+}
